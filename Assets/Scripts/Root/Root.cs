@@ -88,7 +88,11 @@ public class Root : BaseMonoBehaviour
         RestartView.Ctx restartViewCtx = new RestartView.Ctx
         {
             controller = _unitController,
-            onRestart = _unitController.CreatePlayer,
+            onRestart = () =>
+            {
+                _unitController.Player.Dispose();
+                _unitController.CreatePlayer();
+            },
         };
         _restartView.Init(restartViewCtx);
     }
@@ -97,5 +101,10 @@ public class Root : BaseMonoBehaviour
     {
         _projectileController.UpdateStates();
         _unitController.UpdateStates();
+    }
+
+    private void FixedUpdate()
+    {
+        _unitController.UpdatePhysicStates();
     }
 }

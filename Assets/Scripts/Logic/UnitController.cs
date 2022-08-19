@@ -16,6 +16,7 @@ public class UnitController : BaseDisposable
         public RandomResourceGenerator randomResourceGenerator;
         public float baseBorderCoord;
         public float timeDetweenEnemySpawn;
+        public float timeToClearDiedEnemy;
     }
 
     private readonly Ctx _ctx;
@@ -25,6 +26,7 @@ public class UnitController : BaseDisposable
     private float _timer;
     private bool _currentHomeState;
     private bool _isPaused = false;
+    
     public bool CurrentHomeState
     {
         get => _currentHomeState;
@@ -34,7 +36,6 @@ public class UnitController : BaseDisposable
             _currentHomeState = value;
         }
     }
-
     public UnitFactory Factory => _unitFactory;
     public event Action<bool> PlayerChangeHomeState;
     public event Action PlayerDied;
@@ -68,7 +69,7 @@ public class UnitController : BaseDisposable
             attackRadius = 8f,
             attackSpeed = 1f,
             maxHp = 100f,
-            moveSpeed = 10f,
+            moveSpeed = 300f,
             projectileFactory = _ctx.projectileFactory,
             spawnPoint = _ctx.playerSpawnPoint,
             startResources = new List<ConsumableResourcePm>()
@@ -100,6 +101,11 @@ public class UnitController : BaseDisposable
             CurrentHomeState = _player.InHome;
         foreach (var enemy in _enemies)
         {
+            if (!enemy.IsAlive)
+            {
+                enemy.Dispose();
+                continue;
+            }
             if (_player.InHome == false && _player.IsAlive)
             {
                 enemy.SetTarget(_player);
@@ -124,6 +130,15 @@ public class UnitController : BaseDisposable
         _player.SetTarget(nearestEnemyToPlayer);
         _player.UpdateState();
     }
+
+    public void UpdatePhysicStates()
+    {
+        foreach (var enemy in _enemies)
+        {
+            enemy.UpdatePhysicState();
+        }
+        _player.UpdatePhysicState();
+    }
     
     private void ClearDisposed()
     {
@@ -142,7 +157,7 @@ public class UnitController : BaseDisposable
             attackRadius = 1.2f,
             attackSpeed = 2f,
             maxHp = 100f,
-            moveSpeed = 1f,
+            moveSpeed = 150f,
             projectileFactory = _ctx.projectileFactory,
             spawnPoint = _ctx.randomPointGenerator.Get(),
             startResources = _ctx.randomResourceGenerator.GetResourceList()

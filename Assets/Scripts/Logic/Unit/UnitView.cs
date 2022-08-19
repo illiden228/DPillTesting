@@ -7,12 +7,16 @@ public abstract class UnitView : BaseMonoBehaviour
     {
         public float speed;
         public Vector3 spawnPosition;
+        public string runAnimationTrigger;
+        public string idleAnimationTrigger;
+        public string deathAnimationTrigger;
     }
     
-    private BaseCtx baseCtx;
+    private BaseCtx _baseCtx;
     [SerializeField] private UnitMovement _movement;
     [SerializeField] private Transform _projectileSpawn;
     [SerializeField] private Transform _hitTransform;
+    [SerializeField] private Animator _animator;
     protected UnitMovement movement => _movement;
 
     public Transform ProjectileSpawn => _projectileSpawn;
@@ -23,11 +27,17 @@ public abstract class UnitView : BaseMonoBehaviour
 
     public void Init(BaseCtx baseCtx)
     {
-        this.baseCtx = baseCtx;
-        _movement.SetSpeed(baseCtx.speed);
+        _baseCtx = baseCtx;
         transform.position = baseCtx.spawnPosition;
         transform.SetParent(null);
         gameObject.SetActive(true);
+        
+        _movement.Init(new UnitMovement.BaseCtx
+        {
+            idleAnimation = () => _animator.SetTrigger(_baseCtx.idleAnimationTrigger),
+            runAnumation = () => _animator.SetTrigger(_baseCtx.runAnimationTrigger)
+        });
+        _movement.SetSpeed(baseCtx.speed);
     }
 
     public void OnSpeedChanged(float speed)
@@ -47,6 +57,11 @@ public abstract class UnitView : BaseMonoBehaviour
 
     public virtual void Attack(UnitPm unit)
     {
+    }
+
+    public void OnDied()
+    {
+        _animator.SetTrigger(_baseCtx.deathAnimationTrigger);
     }
 
     public void HitProjectile(float damage)

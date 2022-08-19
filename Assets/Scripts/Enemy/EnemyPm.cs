@@ -6,6 +6,7 @@ public class EnemyPm : UnitPm
     { }
 
     private readonly Ctx _ctx;
+    private Vector3 _moveDirection;
 
     public EnemyPm(Ctx ctx, BaseCtx baseCtx) : base(baseCtx)
     {
@@ -21,7 +22,7 @@ public class EnemyPm : UnitPm
         
         if (target != null)
         {
-            Vector3 direction = target.Position - unitView.transform.position;
+            _moveDirection = (target.Position - unitView.transform.position).normalized;
             if (canAttack && InAttackRadius(target.Position))
             {
                 unitView.Attack(target);
@@ -29,9 +30,17 @@ public class EnemyPm : UnitPm
             }
             else
             {
-                unitView.RotateTo(direction);
-                unitView.Move(direction);
+                unitView.RotateTo(_moveDirection);
             }
         }
+        else
+        {
+            _moveDirection = Vector3.zero;
+        }
+    }
+
+    public override void UpdatePhysicState()
+    {
+        unitView.Move(_moveDirection); 
     }
 }

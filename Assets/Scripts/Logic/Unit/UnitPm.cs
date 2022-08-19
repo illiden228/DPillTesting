@@ -8,6 +8,9 @@ public abstract class UnitPm : BaseDisposable
         public IResourceLoader resourceLoader;
         public IPoolObject<UnitView> poolObject;
         public UnitInfo info;
+        public string runAnimationTrigger;
+        public string idleAnimationTrigger;
+        public string deathAnimationTrigger;
     }
 
     protected BaseCtx baseCtx;
@@ -22,7 +25,7 @@ public abstract class UnitPm : BaseDisposable
     protected UnitView unitView;
     protected ProjectileType currentProjectileType;
     protected BugPm _bug;
-    
+
     public Action<float> HpChanged;
 
     public float BaseDamage => baseCtx.info.damage;
@@ -53,7 +56,10 @@ public abstract class UnitPm : BaseDisposable
         UnitView.BaseCtx unitCtx = new UnitView.BaseCtx
         {
             speed = currentSpeed,
-            spawnPosition = baseCtx.info.spawnPoint
+            spawnPosition = baseCtx.info.spawnPoint,
+            deathAnimationTrigger = baseCtx.deathAnimationTrigger,
+            idleAnimationTrigger = baseCtx.idleAnimationTrigger,
+            runAnimationTrigger = baseCtx.runAnimationTrigger
         };
         unitView.Init(unitCtx);
         unitView.ProjectileHit += TakeDamage;
@@ -72,6 +78,10 @@ public abstract class UnitPm : BaseDisposable
             if (attackTimer <= 0)
                 canAttack = true;
         }
+    }
+
+    public virtual void UpdatePhysicState()
+    {
     }
 
     public virtual void Attack(UnitPm unit)
@@ -105,7 +115,8 @@ public abstract class UnitPm : BaseDisposable
     public virtual void Died()
     {
         isAlive = false;
-        Dispose();
+        unitView.OnDied();
+        _bug.AbortAll();
         Debug.Log("умер " + unitView.name);
     }
 
@@ -132,7 +143,6 @@ public abstract class UnitPm : BaseDisposable
     protected override void OnDispose()
     {
         base.OnDispose();
-        _bug.AbortAll();
         _bug.Dispose();
         unitView.ProjectileHit -= TakeDamage;
         unitView.TouchedResource -= OnTouchedResource;

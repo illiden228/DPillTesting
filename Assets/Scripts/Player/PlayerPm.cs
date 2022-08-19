@@ -38,8 +38,6 @@ public class PlayerPm : UnitPm
         base.UpdateState();
         if(!isAlive)
             return;
-        
-        unitView.Move(_joystick.Direction);
 
         if (target != null)
         {
@@ -55,6 +53,20 @@ public class PlayerPm : UnitPm
         {
             unitView.RotateTo(_joystick.Direction);
         }
+    }
+
+    public override void UpdatePhysicState()
+    {
+        if(!isAlive)
+            return;
+        
+        unitView.Move(_joystick.Direction);
+    }
+
+    public override void Died()
+    {
+        base.Died();
+        _joystick.Dispose();
     }
 
     public List<ConsumableResourcePm> TakeAllResources()

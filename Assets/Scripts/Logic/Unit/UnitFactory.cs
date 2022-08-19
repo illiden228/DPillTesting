@@ -38,7 +38,10 @@ public class UnitFactory : Factory<UnitType, UnitView, UnitInfo, UnitPm>
         {
             resourceLoader = baseCtx.resourceLoader,
             info = info,
-            poolObject = pools[type]
+            poolObject = pools[type],
+            deathAnimationTrigger = CharacterAnimations.FAILLING_DEATH_TRIGGER,
+            idleAnimationTrigger = CharacterAnimations.IDLE_TRIGGER,
+            runAnimationTrigger = CharacterAnimations.RUNNING_TRIGGER
         };
 
         switch (type)
